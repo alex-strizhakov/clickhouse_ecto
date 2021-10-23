@@ -3,6 +3,7 @@ defmodule ClickhouseEcto do
 
   @moduledoc false
   @behaviour Ecto.Adapter.Storage
+  @behaviour Ecto.Adapter.Structure
 
   use Ecto.Adapters.SQL,
     driver: :clickhousex,
@@ -17,16 +18,20 @@ defmodule ClickhouseEcto do
   def autogenerate(:binary_id), do: Ecto.UUID.generate()
   def autogenerate(type), do: super(type)
 
-  def dumpers({:embed, _} = type, _), do: [&Ecto.Adapters.SQL.dump_embed(type, &1)]
+  def dumpers({:embed, _} = type, _), do: [&Ecto.Type.embedded_dump(type, &1, :json)]
   def dumpers(:binary_id, _type), do: []
   def dumpers(:uuid, _type), do: []
   def dumpers(ecto_type, type), do: [type, &encode(&1, ecto_type)]
 
-  def loaders({:embed, _} = type, _), do: [&Ecto.Adapters.SQL.load_embed(type, &1)]
+  def loaders({:embed, _} = type, _), do: [&Ecto.Type.embedded_load(type, &1, :json)]
   def loaders(ecto_type, type), do: [&decode(&1, ecto_type), type]
 
   ## Migration
+  @impl Ecto.Adapter.Migration
   def supports_ddl_transaction?, do: Migration.supports_ddl_transaction?()
+
+  @impl Ecto.Adapter.Migration
+  def lock_for_migrations(_meta, _opts, fun), do: fun.()
 
   ## Storage
   @impl Ecto.Adapter.Storage
@@ -37,6 +42,8 @@ defmodule ClickhouseEcto do
   def storage_status(opts), do: Storage.storage_status(opts)
 
   ## Structure
+  @impl Ecto.Adapter.Structure
   def structure_dump(default, config), do: Structure.structure_dump(default, config)
+  @impl Ecto.Adapter.Structure
   def structure_load(default, config), do: Structure.structure_load(default, config)
 end

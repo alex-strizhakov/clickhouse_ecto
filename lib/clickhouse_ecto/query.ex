@@ -40,9 +40,10 @@ defmodule ClickhouseEcto.Query do
           header :: [atom],
           rows :: [[atom | nil]],
           on_conflict :: Ecto.Adapter.on_conflict(),
-          returning :: [atom]
+          returning :: [atom],
+          keyword()
         ) :: String.t()
-  def insert(prefix, table, header, rows, _on_conflict, _returning) do
+  def insert(prefix, table, header, rows, _on_conflict, _returning, _opts) do
     included_fields =
       header
       |> Enum.filter(fn value -> Enum.any?(rows, fn row -> value in row end) end)

@@ -57,17 +57,19 @@ defmodule ClickhouseEcto.Storage do
   end
 
   defp run_query(sql, opts) do
+    {:ok, _} = Application.ensure_all_started(:ecto_sql)
+    {:ok, _} = Application.ensure_all_started(:db_connection)
+
     opts =
       opts
       |> Keyword.drop([:name, :log])
-      |> Keyword.put(:pool, DBConnection.Connection)
       |> Keyword.put(:backoff_type, :stop)
+      |> Keyword.put(:show_sensitive_data_on_connection_error, true)
 
     {:ok, pid} = Task.Supervisor.start_link()
 
     task =
       Task.Supervisor.async_nolink(pid, fn ->
-        HTTPoison.start()
         {:ok, conn} = DBConnection.start_link(Clickhousex.Protocol, opts)
         value = ClickhouseEcto.Connection.execute(conn, sql, [], opts)
         GenServer.stop(conn)

@@ -9,7 +9,7 @@ defmodule ClickhouseEcto.Type do
   end
 
   def encode(value, :binary_id) when is_binary(value) do
-    Ecto.UUID.load(value)
+    {:ok, Ecto.UUID.load(value)}
   end
 
   def encode(value, :decimal) do
@@ -20,9 +20,7 @@ defmodule ClickhouseEcto.Type do
       {:ok, value}
   end
 
-  def encode(value, _type) do
-    {:ok, value}
-  end
+  def encode(value, _type), do: {:ok, value}
 
   def decode(value, type)
       when type in @int_types and is_binary(value) do
@@ -48,7 +46,7 @@ defmodule ClickhouseEcto.Type do
   end
 
   def decode(value, :uuid) do
-    Ecto.UUID.dump(value)
+    {:ok, Ecto.UUID.dump(value)}
   end
 
   def decode({date, {h, m, s}}, type)
@@ -65,7 +63,12 @@ defmodule ClickhouseEcto.Type do
     end
   end
 
-  def decode(value, _type) do
-    {:ok, value}
+  def decode(value, :boolean) do
+    case value do
+      0 -> {:ok, false}
+      1 -> {:ok, true}
+    end
   end
+
+  def decode(value, _type), do: {:ok, value}
 end

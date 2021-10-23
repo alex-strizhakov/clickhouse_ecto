@@ -10,7 +10,9 @@ defmodule ClickhouseEcto.Mixfile do
       deps: deps(),
       description: description(),
       package: package(),
-      source_url: "https://github.com/clickhouse-elixir/clickhouse_ecto"
+      source_url: "https://github.com/clickhouse-elixir/clickhouse_ecto",
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test]
     ]
   end
 
@@ -24,12 +26,13 @@ defmodule ClickhouseEcto.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto_sql, "~> 3.0"},
-      {:clickhousex, "~> 0.5.0"},
+      {:ecto_sql, "~> 3.6"},
+      {:clickhousex,
+       github: "alex-strizhakov/clickhousex", revision: "342f95c96c1c813009c4daf420ad91033ef8c80e"},
       {:ex_doc, "~> 0.19", only: :dev},
       {:db_connection, "~> 2.0"},
       {:credo, "~> 1.5", only: :dev},
-      # {:nicene, "~> 0.4.0", only: :dev}
+      {:excoveralls, "~> 0.10", only: :test}
     ]
   end
 
@@ -48,12 +51,14 @@ defmodule ClickhouseEcto.Mixfile do
   end
 
   defp maintainers do
-    ["Roman Chudov",
-     "Konstantin Grabar",
-     "Evgeniy Shurmin",
-     "Alexey Lukyanov",
-     "Yaroslav Rogov",
-     "Ivan Sokolov",
-     "Georgy Sychev"]
+    [
+      "Roman Chudov",
+      "Konstantin Grabar",
+      "Evgeniy Shurmin",
+      "Alexey Lukyanov",
+      "Yaroslav Rogov",
+      "Ivan Sokolov",
+      "Georgy Sychev"
+    ]
   end
 end

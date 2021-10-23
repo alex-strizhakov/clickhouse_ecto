@@ -24,8 +24,8 @@ defmodule ClickhouseEctoTest do
 
   defp all(query), do: query |> SQL.all() |> IO.iodata_to_binary()
 
-  defp insert(prefx, table, header, rows, on_conflict, returning) do
-    IO.iodata_to_binary(SQL.insert(prefx, table, header, rows, on_conflict, returning))
+  defp insert(prefx, table, header, rows, on_conflict, returning, opts) do
+    IO.iodata_to_binary(SQL.insert(prefx, table, header, rows, on_conflict, returning, opts))
   end
 
   test "from" do
@@ -327,16 +327,16 @@ defmodule ClickhouseEctoTest do
   # Schema based
 
   test "insert" do
-    query = insert(nil, "schema", [:x, :y], [[:x, :y]], {:raise, [], []}, [])
+    query = insert(nil, "schema", [:x, :y], [[:x, :y]], {:raise, [], []}, [], [])
     assert query == ~s{INSERT INTO "schema" ("x","y") VALUES (?,?)}
 
-    query = insert(nil, "schema", [:x, :y], [[:x, :y], [nil, :y]], {:raise, [], []}, [])
+    query = insert(nil, "schema", [:x, :y], [[:x, :y], [nil, :y]], {:raise, [], []}, [], [])
     assert query == ~s{INSERT INTO "schema" ("x","y") VALUES (?,?),(DEFAULT,?)}
 
-    query = insert(nil, "schema", [], [[]], {:raise, [], []}, [])
+    query = insert(nil, "schema", [], [[]], {:raise, [], []}, [], [])
     assert query == ~s{INSERT INTO "schema" () VALUES ()}
 
-    query = insert("prefix", "schema", [], [[]], {:raise, [], []}, [])
+    query = insert("prefix", "schema", [], [[]], {:raise, [], []}, [], [])
     assert query == ~s{INSERT INTO "prefix"."schema" () VALUES ()}
   end
 end
