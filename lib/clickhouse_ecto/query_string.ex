@@ -70,12 +70,15 @@ defmodule ClickhouseEcto.QueryString do
     [
       ?\s
       | Helpers.intersperse_map(joins, ?\s, fn
-          %JoinExpr{qual: qual, ix: ix, source: source, on: %QueryExpr{expr: on_expr}} ->
-            {join, _name} = Helpers.get_source(query, sources, ix, source)
-            ["ANY", join_qual(qual), join, " USING ", on_join_expr(on_expr)]
+          %JoinExpr{qual: qual, ix: ix, source: source, on: %QueryExpr{expr: expr}} ->
+            {join, name} = Helpers.get_source(query, sources, ix, source)
+            ["ANY ", join_qual(qual), join, " AS ", name | join_on(qual, expr, sources, query)]
         end)
     ]
   end
+
+  defp join_on(:cross, true, _sources, _query), do: []
+  defp join_on(_qual, expr, sources, query), do: [" ON " | expr(expr, sources, query)]
 
   def on_join_expr({_, _, [head | tail]}) do
     retorno = [on_join_expr(head) | on_join_expr(tail)]
@@ -94,8 +97,11 @@ defmodule ClickhouseEcto.QueryString do
     column |> Atom.to_string()
   end
 
-  def join_qual(:inner), do: " INNER JOIN "
-  def join_qual(:left), do: " LEFT OUTER JOIN "
+  defp join_qual(:inner), do: "INNER JOIN "
+  defp join_qual(:left), do: "LEFT OUTER JOIN "
+  defp join_qual(:right), do: "RIGHT OUTER JOIN "
+  defp join_qual(:full), do: "FULL OUTER JOIN "
+  defp join_qual(:cross), do: "CROSS JOIN "
 
   def where(%Query{wheres: wheres} = query, sources) do
     boolean(" WHERE ", wheres, sources, query)

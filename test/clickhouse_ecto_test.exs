@@ -13,6 +13,15 @@ defmodule ClickhouseEctoTest do
       field(:x, :integer)
       field(:y, :integer)
       field(:z, :integer)
+      field(:join_id, :integer)
+    end
+  end
+
+  defmodule Join do
+    use Ecto.Schema
+
+    schema "joins" do
+      field(:name)
     end
   end
 
@@ -338,5 +347,19 @@ defmodule ClickhouseEctoTest do
 
     query = insert("prefix", "schema", [], [[]], {:raise, [], []}, [], [])
     assert query == ~s{INSERT INTO "prefix"."schema" () VALUES ()}
+  end
+
+  test "join" do
+    query =
+      from(s in Schema,
+        join: j in Join,
+        on: s.join_id == j.id,
+        select: %{join_id: s.join_id, join_name: j.name},
+        where: s.x == 1
+      )
+      |> normalize()
+
+    assert all(query) ==
+             ~s{SELECT s0.\"join_id\", j1.\"name\" FROM \"schema\" AS s0 ANY INNER JOIN \"joins\" AS j1 ON s0.\"join_id\" = j1.\"id\" WHERE (s0.\"x\" = 1)}
   end
 end
