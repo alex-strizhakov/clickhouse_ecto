@@ -28,7 +28,7 @@ defmodule ClickhouseEcto.Mixfile do
     [
       {:ecto_sql, "~> 3.6"},
       {:clickhousex,
-       github: "alex-strizhakov/clickhousex", ref: "4349039a7348279d66944e1852c35e5693a477af"},
+       github: "alex-strizhakov/clickhousex", ref: "f04b16427a20ee6e8e8237894e7129a588a6b2e7"},
       {:ex_doc, "~> 0.19", only: :dev},
       {:db_connection, "~> 2.0"},
       {:credo, "~> 1.5", only: :dev},
